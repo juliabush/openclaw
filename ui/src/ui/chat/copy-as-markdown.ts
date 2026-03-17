@@ -4,6 +4,7 @@ import { icons } from "../icons.ts";
 const COPIED_FOR_MS = 1500;
 const ERROR_FOR_MS = 2000;
 const COPY_LABEL = "Copy as markdown";
+const COPY_PLAIN_LABEL = "Copy as plain text";
 const COPIED_LABEL = "Copied";
 const ERROR_LABEL = "Copy failed";
 
@@ -94,4 +95,8 @@ function createCopyButton(options: CopyButtonOptions): TemplateResult {
 
 export function renderCopyAsMarkdownButton(markdown: string): TemplateResult {
   return createCopyButton({ text: () => markdown, label: COPY_LABEL });
+}
+
+export function renderCopyAsPlainTextButton(plainText: string): TemplateResult {
+  return createCopyButton({ text: () => plainText, label: COPY_PLAIN_LABEL });
 }
