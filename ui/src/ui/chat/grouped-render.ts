@@ -625,8 +625,15 @@ function renderCopyMenu(markdown: string) {
 
   return html`
     <span class="chat-copy-wrap">
-      <details class="chat-copy-popover-wrap">
-        <summary class="chat-copy-btn">
+      <details class="chat-copy-popover-wrap" @click=${(e: Event) => {
+        const target = e.target as HTMLElement;
+        const btn = target.closest("button");
+        if (btn) {
+          const details = e.currentTarget as HTMLDetailsElement;
+          details.open = false;
+        }
+      }}>   
+       <summary class="chat-copy-btn">
           <span class="chat-copy-btn__icon">
             ${icons.copy}
           </span>
@@ -668,7 +675,6 @@ function renderGroupedMessage(
   const reasoningMarkdown = extractedThinking ? formatReasoningMarkdown(extractedThinking) : null;
   const markdown = markdownBase;
   const canCopyMarkdown = role === "assistant" && Boolean(markdown?.trim());
-  const canExpand = role === "assistant" && Boolean(onOpenSidebar && markdown?.trim());
 
   // Detect pure-JSON messages and render as collapsible block
   const jsonResult = markdown && !opts.isStreaming ? detectJson(markdown) : null;
@@ -696,14 +702,13 @@ function renderGroupedMessage(
   const toolPreview =
     markdown && !toolSummaryLabel ? markdown.trim().replace(/\s+/g, " ").slice(0, 120) : "";
 
-  const hasActions = canCopyMarkdown || canExpand;
+  const hasActions = canCopyMarkdown;
 
   return html`
     <div class="${bubbleClasses}">
       ${
         hasActions
           ? html`<div class="chat-bubble-actions">
-              ${canExpand ? renderExpandButton(markdown!, onOpenSidebar!) : nothing}
               ${canCopyMarkdown ? renderCopyMenu(markdown!) : nothing}
             </div>`
           : nothing

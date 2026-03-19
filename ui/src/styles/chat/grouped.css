@@ -199,6 +199,7 @@ img.chat-avatar {
   top: 50%;
   right: 8px;
   transform: translateY(-50%);
+  z-index: 9999;
 }
 
 .chat-copy-popover-wrap {
@@ -243,6 +244,7 @@ img.chat-avatar {
 }
 
 .chat-copy-btn {
+  z-index: 9999;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -298,6 +300,11 @@ img.chat-avatar {
 }
 
 .chat-bubble:hover .chat-copy-wrap .chat-copy-btn {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.chat-copy-popover-wrap[open] .chat-copy-btn {
   opacity: 1;
   pointer-events: auto;
 }
