@@ -620,19 +620,6 @@ function jsonSummaryLabel(parsed: unknown): string {
   return "JSON";
 }
 
-<<<<<<< HEAD
-function renderExpandButton(markdown: string, onOpenSidebar: (content: string) => void) {
-  return html`
-    <button
-      class="chat-expand-btn"
-      type="button"
-      title="Open in canvas"
-      aria-label="Open in canvas"
-      @click=${() => onOpenSidebar(markdown)}
-    >
-      <span class="chat-expand-btn__icon" aria-hidden="true">${icons.panelRightOpen}</span>
-    </button>
-=======
 function renderCopyMenu(markdown: string) {
   const htmlContent = toSanitizedMarkdownHtml(markdown);
 
@@ -651,7 +638,6 @@ function renderCopyMenu(markdown: string) {
         </div>
       </details>
     </span>
->>>>>>> 3a79df1a1a (add: css for copy to clipboard button)
   `;
 }
 
@@ -714,24 +700,14 @@ function renderGroupedMessage(
 
   return html`
     <div class="${bubbleClasses}">
-<<<<<<< HEAD
       ${
         hasActions
           ? html`<div class="chat-bubble-actions">
               ${canExpand ? renderExpandButton(markdown!, onOpenSidebar!) : nothing}
-              ${canCopyMarkdown ? renderCopyAsMarkdownButton(markdown!) : nothing}
+              ${canCopyMarkdown ? renderCopyMenu(markdown!) : nothing}
             </div>`
           : nothing
       }
-=======
-    ${
-      canCopyMarkdown
-        ? html`<div class="chat-bubble-actions">
-      ${renderCopyMenu(markdown!)}
-    </div>`
-        : nothing
-    }
->>>>>>> 3a79df1a1a (add: css for copy to clipboard button)
       ${
         isToolMessage
           ? html`

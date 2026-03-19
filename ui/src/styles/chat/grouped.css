@@ -198,29 +198,6 @@ img.chat-avatar {
   position: absolute;
   top: 50%;
   right: 8px;
-<<<<<<< HEAD
-  display: flex;
-  gap: 4px;
-  opacity: 0;
-  pointer-events: none;
-  transition: opacity 120ms ease-out;
-}
-
-.chat-bubble:hover .chat-bubble-actions {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-@media (hover: none) {
-  .chat-bubble-actions {
-    opacity: 1;
-    pointer-events: auto;
-  }
-}
-
-.chat-copy-btn,
-.chat-expand-btn {
-=======
   transform: translateY(-50%);
 }
 
@@ -269,7 +246,6 @@ img.chat-avatar {
   display: inline-flex;
   align-items: center;
   justify-content: center;
->>>>>>> 3a79df1a1a (add: css for copy to clipboard button)
   border: 1px solid var(--border);
   background: var(--bg);
   color: var(--muted);
@@ -279,6 +255,9 @@ img.chat-avatar {
   line-height: 1;
   cursor: pointer;
   transition: background 120ms ease-out;
+
+  opacity: 0;
+  pointer-events: none;
 }
 
 .chat-copy-btn__icon {
@@ -318,17 +297,12 @@ img.chat-avatar {
   opacity: 1;
 }
 
-<<<<<<< HEAD
-.chat-copy-btn:hover,
-.chat-expand-btn:hover {
-=======
 .chat-bubble:hover .chat-copy-wrap .chat-copy-btn {
   opacity: 1;
   pointer-events: auto;
 }
 
 .chat-copy-btn:hover {
->>>>>>> 3a79df1a1a (add: css for copy to clipboard button)
   background: var(--bg-hover);
 }
 
