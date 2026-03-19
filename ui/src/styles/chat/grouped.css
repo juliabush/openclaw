@@ -196,8 +196,9 @@ img.chat-avatar {
 
 .chat-bubble-actions {
   position: absolute;
-  top: 6px;
+  top: 50%;
   right: 8px;
+<<<<<<< HEAD
   display: flex;
   gap: 4px;
   opacity: 0;
@@ -219,11 +220,61 @@ img.chat-avatar {
 
 .chat-copy-btn,
 .chat-expand-btn {
+=======
+  transform: translateY(-50%);
+}
+
+.chat-copy-popover-wrap {
+  position: relative;
+}
+
+.chat-copy-popover {
+  position: absolute;
+  bottom: calc(100% + 6px);
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 6px;
+  z-index: 10;
+}
+
+.chat-copy-popover button {
+  background: none;
+  border: none;
+  padding: 4px 8px;
+  text-align: left;
+  cursor: pointer;
+  color: var(--fg);
+}
+
+.chat-copy-popover button:hover {
+  background: var(--bg-hover);
+}
+
+.chat-copy-popover-wrap summary {
+  list-style: none;
+  cursor: pointer;
+}
+
+.chat-copy-popover-wrap summary::-webkit-details-marker {
+  display: none;
+}
+
+.chat-copy-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+>>>>>>> 3a79df1a1a (add: css for copy to clipboard button)
   border: 1px solid var(--border);
   background: var(--bg);
   color: var(--muted);
   border-radius: var(--radius-md);
-  padding: 4px 6px;
+  padding: 6px 6px;
   font-size: 14px;
   line-height: 1;
   cursor: pointer;
@@ -267,8 +318,17 @@ img.chat-avatar {
   opacity: 1;
 }
 
+<<<<<<< HEAD
 .chat-copy-btn:hover,
 .chat-expand-btn:hover {
+=======
+.chat-bubble:hover .chat-copy-wrap .chat-copy-btn {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.chat-copy-btn:hover {
+>>>>>>> 3a79df1a1a (add: css for copy to clipboard button)
   background: var(--bg-hover);
 }
 

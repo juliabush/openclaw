@@ -8,7 +8,7 @@ import { openExternalUrlSafe } from "../open-external-url.ts";
 import { detectTextDirection } from "../text-direction.ts";
 import type { MessageGroup, ToolCard } from "../types/chat-types.ts";
 import { agentLogoUrl } from "../views/agents-utils.ts";
-import { renderCopyAsMarkdownButton } from "./copy-as-markdown.ts";
+import { renderCopyAsMarkdownButton, renderCopyAsPlainTextButton } from "./copy-as-markdown.ts";
 import {
   extractTextCached,
   extractThinkingCached,
@@ -620,6 +620,7 @@ function jsonSummaryLabel(parsed: unknown): string {
   return "JSON";
 }
 
+<<<<<<< HEAD
 function renderExpandButton(markdown: string, onOpenSidebar: (content: string) => void) {
   return html`
     <button
@@ -631,6 +632,26 @@ function renderExpandButton(markdown: string, onOpenSidebar: (content: string) =
     >
       <span class="chat-expand-btn__icon" aria-hidden="true">${icons.panelRightOpen}</span>
     </button>
+=======
+function renderCopyMenu(markdown: string) {
+  const htmlContent = toSanitizedMarkdownHtml(markdown);
+
+  return html`
+    <span class="chat-copy-wrap">
+      <details class="chat-copy-popover-wrap">
+        <summary class="chat-copy-btn">
+          <span class="chat-copy-btn__icon">
+            ${icons.copy}
+          </span>
+        </summary>
+
+        <div class="chat-copy-popover">
+          ${renderCopyAsMarkdownButton(markdown)}
+          ${renderCopyAsPlainTextButton(htmlContent)}
+        </div>
+      </details>
+    </span>
+>>>>>>> 3a79df1a1a (add: css for copy to clipboard button)
   `;
 }
 
@@ -693,6 +714,7 @@ function renderGroupedMessage(
 
   return html`
     <div class="${bubbleClasses}">
+<<<<<<< HEAD
       ${
         hasActions
           ? html`<div class="chat-bubble-actions">
@@ -701,6 +723,15 @@ function renderGroupedMessage(
             </div>`
           : nothing
       }
+=======
+    ${
+      canCopyMarkdown
+        ? html`<div class="chat-bubble-actions">
+      ${renderCopyMenu(markdown!)}
+    </div>`
+        : nothing
+    }
+>>>>>>> 3a79df1a1a (add: css for copy to clipboard button)
       ${
         isToolMessage
           ? html`
