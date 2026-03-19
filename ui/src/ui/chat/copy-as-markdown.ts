@@ -1,5 +1,4 @@
 import { html, type TemplateResult } from "lit";
-import { icons } from "../icons.ts";
 
 const COPIED_FOR_MS = 1500;
 const ERROR_FOR_MS = 2000;
@@ -85,9 +84,8 @@ function createCopyButton(options: CopyButtonOptions): TemplateResult {
         }, COPIED_FOR_MS);
       }}
     >
-      <span class="chat-copy-btn__icon" aria-hidden="true">
-        <span class="chat-copy-btn__icon-copy">${icons.copy}</span>
-        <span class="chat-copy-btn__icon-check">${icons.check}</span>
+      <span class="chat-copy-btn__label">
+        ${idleLabel}
       </span>
     </button>
   `;
@@ -97,6 +95,27 @@ export function renderCopyAsMarkdownButton(markdown: string): TemplateResult {
   return createCopyButton({ text: () => markdown, label: COPY_LABEL });
 }
 
-export function renderCopyAsPlainTextButton(plainText: string): TemplateResult {
-  return createCopyButton({ text: () => plainText, label: COPY_PLAIN_LABEL });
+export function renderCopyAsPlainTextButton(html: string): TemplateResult {
+  return createCopyButton({
+    text: () => {
+      const tmp = document.createElement("div");
+      tmp.innerHTML = html;
+
+      tmp.querySelectorAll(".code-block-wrapper").forEach((el) => {
+        const code = el.querySelector("code");
+        el.replaceWith(document.createTextNode(code?.textContent || ""));
+      });
+
+      tmp.querySelectorAll("pre").forEach((el) => {
+        el.replaceWith(document.createTextNode(el.textContent || ""));
+      });
+
+      tmp.querySelectorAll("code").forEach((el) => {
+        el.replaceWith(document.createTextNode(el.textContent || ""));
+      });
+
+      return tmp.innerText.replace(/\n{3,}/g, "\n\n").trim();
+    },
+    label: COPY_PLAIN_LABEL,
+  });
 }
