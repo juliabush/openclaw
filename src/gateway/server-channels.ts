@@ -25,6 +25,18 @@ const CHANNEL_RESTART_POLICY: BackoffPolicy = {
 };
 const MAX_RESTART_ATTEMPTS = 10;
 
+export const syncPluginRegistry = () => {
+  const runtimeState = (
+    globalThis as typeof globalThis & {
+      __openclaw_plugin_runtime_state?: { registry?: PluginRegistry };
+    }
+  ).__openclaw_plugin_runtime_state;
+
+  if (runtimeState?.registry) {
+    setActivePluginRegistry(runtimeState.registry);
+  }
+};
+
 export type ChannelRuntimeSnapshot = {
   channels: Partial<Record<ChannelId, ChannelAccountSnapshot>>;
   channelAccounts: Partial<Record<ChannelId, Record<string, ChannelAccountSnapshot>>>;
@@ -137,17 +149,6 @@ export type ChannelManager = {
 
 // Channel docking: lifecycle hooks (`plugin.gateway`) flow through this manager.
 export function createChannelManager(opts: ChannelManagerOptions): ChannelManager {
-  const syncPluginRegistry = () => {
-    const runtimeState = (
-      globalThis as typeof globalThis & {
-        __openclaw_plugin_runtime_state?: { registry?: PluginRegistry };
-      }
-    ).__openclaw_plugin_runtime_state;
-
-    if (runtimeState?.registry) {
-      setActivePluginRegistry(runtimeState.registry);
-    }
-  };
   const { loadConfig, channelLogs, channelRuntimeEnvs, channelRuntime, resolveChannelRuntime } =
     opts;
 
