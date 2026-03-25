@@ -809,10 +809,6 @@ export function createGatewayHttpServer(opts: {
         : null;
       const requestStages: GatewayHttpRequestStage[] = [
         {
-          name: "hooks",
-          run: () => handleHooksRequest(req, res),
-        },
-        {
           name: "tools-invoke",
           run: () =>
             handleToolsInvokeHttpRequest(req, res, {
@@ -924,6 +920,12 @@ export function createGatewayHttpServer(opts: {
           rateLimiter,
         }),
       );
+      requestStages.push({
+        name: "hooks",
+        run: () => {
+          return handleHooksRequest(req, res);
+        },
+      });
 
       if (controlUiEnabled) {
         requestStages.push({
