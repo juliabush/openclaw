@@ -17,6 +17,7 @@ import { resolveGatewayService } from "../daemon/service.js";
 import { hasAmbiguousGatewayAuthModeConfig } from "../gateway/auth-mode-policy.js";
 import { resolveGatewayAuth } from "../gateway/auth.js";
 import { buildGatewayConnectionDetails } from "../gateway/call.js";
+import { runStartupMatrixMigration } from "../gateway/server-startup-matrix-migration.js";
 import { resolveOpenClawPackageRoot } from "../infra/openclaw-root.js";
 import type { RuntimeEnv } from "../runtime.js";
 import { defaultRuntime } from "../runtime.js";
@@ -44,7 +45,6 @@ import { noteMemorySearchHealth } from "./doctor-memory-search.js";
 import {
   noteMacLaunchAgentOverrides,
   noteMacLaunchctlGatewayEnvOverrides,
-  noteDeprecatedLegacyEnvVars,
   noteStartupOptimizationHints,
 } from "./doctor-platform-notes.js";
 import { createDoctorPrompter, type DoctorOptions } from "./doctor-prompter.js";
@@ -98,7 +98,6 @@ export async function doctorCommand(
 
   await maybeRepairUiProtocolFreshness(runtime, prompter);
   noteSourceInstallIssues(root);
-  noteDeprecatedLegacyEnvVars();
   noteStartupOptimizationHints();
 
   const configResult = await loadAndMaybeMigrateDoctorConfig({
@@ -236,6 +235,19 @@ export async function doctorCommand(
   await noteMacLaunchAgentOverrides();
   await noteMacLaunchctlGatewayEnvOverrides(cfg);
 
+  if (prompter.shouldRepair) {
+    await runStartupMatrixMigration({
+      cfg,
+      env: process.env,
+      log: {
+        info: (message) => runtime.log(message),
+        warn: (message) => runtime.error(message),
+      },
+      trigger: "doctor-fix",
+      logPrefix: "doctor",
+    });
+  }
+
   await noteSecurityWarnings(cfg);
   await noteChromeMcpBrowserReadiness(cfg);
   await noteOpenAIOAuthTlsPrerequisites({
@@ -327,14 +339,6 @@ export async function doctorCommand(
       })
     : { checked: false, ready: false };
   await noteMemorySearchHealth(cfg, { gatewayMemoryProbe });
-  await maybeRepairGatewayDaemon({
-    cfg,
-    runtime,
-    prompter,
-    options,
-    gatewayDetailsMessage: gatewayDetails.message,
-    healthOk,
-  });
 
   const shouldWriteConfig =
     configResult.shouldWriteConfig || JSON.stringify(cfg) !== JSON.stringify(cfgForPersistence);
@@ -356,6 +360,28 @@ export async function doctorCommand(
     if (await shouldSuggestMemorySystem(workspaceDir)) {
       note(MEMORY_SYSTEM_PROMPT, "Workspace");
     }
+  }
+
+  const tokenChanged = cfg.gateway?.auth?.token !== cfgForPersistence.gateway?.auth?.token;
+
+  await maybeRepairGatewayDaemon({
+    cfg,
+    runtime,
+    prompter,
+    options,
+    gatewayDetailsMessage: gatewayDetails.message,
+    healthOk,
+  });
+
+  if (tokenChanged && healthOk) {
+    await maybeRepairGatewayDaemon({
+      cfg,
+      runtime,
+      prompter,
+      options,
+      gatewayDetailsMessage: "Token updated",
+      healthOk: false,
+    });
   }
 
   const finalSnapshot = await readConfigFileSnapshot();

@@ -1,3 +1,4 @@
+import fs from "node:fs";
 import { fetch as realFetch } from "undici";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
@@ -6,6 +7,7 @@ import {
   installBrowserControlServerHooks,
   makeResponse,
   resetBrowserControlServerTestContext,
+  setBrowserControlServerReachable,
   startBrowserControlServerFromConfig,
 } from "./server.control-server.test-harness.js";
 
@@ -27,6 +29,7 @@ describe("browser control server", () => {
   });
 
   it("POST /tabs/open returns 400 for invalid URLs", async () => {
+    setBrowserControlServerReachable(true);
     await startBrowserControlServerFromConfig();
     const base = getBrowserControlServerBaseUrl();
 
@@ -126,10 +129,47 @@ describe("profile CRUD endpoints", () => {
       profile?: string;
       transport?: string;
       cdpPort?: number | null;
+      userDataDir?: string | null;
     };
     expect(createClawdBody.profile).toBe("legacyclawd");
     expect(createClawdBody.transport).toBe("cdp");
     expect(createClawdBody.cdpPort).toBeTypeOf("number");
+    expect(createClawdBody.userDataDir).toBeNull();
+
+    const explicitUserDataDir = "/tmp/openclaw-brave-profile";
+    await fs.promises.mkdir(explicitUserDataDir, { recursive: true });
+    const createExistingSession = await realFetch(`${base}/profiles/create`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: "brave-live",
+        driver: "existing-session",
+        userDataDir: explicitUserDataDir,
+      }),
+    });
+    expect(createExistingSession.status).toBe(200);
+    const createExistingSessionBody = (await createExistingSession.json()) as {
+      profile?: string;
+      transport?: string;
+      userDataDir?: string | null;
+    };
+    expect(createExistingSessionBody.profile).toBe("brave-live");
+    expect(createExistingSessionBody.transport).toBe("chrome-mcp");
+    expect(createExistingSessionBody.userDataDir).toBe(explicitUserDataDir);
+
+    const createBadExistingSession = await realFetch(`${base}/profiles/create`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        name: "bad-live",
+        userDataDir: explicitUserDataDir,
+      }),
+    });
+    expect(createBadExistingSession.status).toBe(400);
+    const createBadExistingSessionBody = (await createBadExistingSession.json()) as {
+      error: string;
+    };
+    expect(createBadExistingSessionBody.error).toContain("driver=existing-session is required");
 
     const createLegacyDriver = await realFetch(`${base}/profiles/create`, {
       method: "POST",
