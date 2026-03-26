@@ -7,7 +7,6 @@ import {
   countSensitiveConfigValues,
   humanize,
   pathKey,
-  REDACTED_PLACEHOLDER,
   schemaType,
   type JsonSchema,
 } from "./config-form.shared.ts";
@@ -1080,18 +1079,14 @@ export function renderConfig(props: ConfigProps) {
                             : nothing
                         }
                       </span>
-                      <textarea
-                        class="${blurred ? "config-raw-redacted" : ""}"
-                        placeholder=${blurred ? REDACTED_PLACEHOLDER : "Raw JSON5 config"}
-                        .value=${blurred ? "" : props.raw}
-                        ?readonly=${blurred}
-                        @input=${(e: Event) => {
-                          if (blurred) {
-                            return;
-                          }
-                          props.onRawChange((e.target as HTMLTextAreaElement).value);
-                        }}
-                      ></textarea>
+                     <textarea
+                      class="${blurred ? "config-raw-redacted" : ""}"
+                      placeholder="Raw config (JSON/JSON5)"
+                      .value=${props.raw}
+                      @input=${(e: Event) => {
+                        props.onRawChange((e.target as HTMLTextAreaElement).value);
+                      }}
+>                    </textarea>
                     </label>
                   `;
                   })()
