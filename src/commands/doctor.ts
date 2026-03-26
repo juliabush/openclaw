@@ -364,7 +364,16 @@ export async function doctorCommand(
 
   const tokenChanged = cfg.gateway?.auth?.token !== cfgForPersistence.gateway?.auth?.token;
 
-  if (tokenChanged) {
+  await maybeRepairGatewayDaemon({
+    cfg,
+    runtime,
+    prompter,
+    options,
+    gatewayDetailsMessage: gatewayDetails.message,
+    healthOk,
+  });
+
+  if (tokenChanged && healthOk) {
     await maybeRepairGatewayDaemon({
       cfg,
       runtime,
