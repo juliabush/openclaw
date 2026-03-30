@@ -1,7 +1,7 @@
 import type { AgentEvent, AgentMessage } from "@mariozechner/pi-agent-core";
 import { resolveSendableOutboundReplyParts } from "openclaw/plugin-sdk/reply-payload";
-import { isSilentReplyText, SILENT_REPLY_TOKEN } from "../auto-reply/tokens.js";
 import { parseReplyDirectives } from "../auto-reply/reply/reply-directives.js";
+import { isSilentReplyText, SILENT_REPLY_TOKEN } from "../auto-reply/tokens.js";
 import { emitAgentEvent } from "../infra/agent-events.js";
 import { createInlineCodeState } from "../markdown/code-spans.js";
 import {
@@ -152,8 +152,17 @@ export function handleMessageStart(
   // Start-of-message is a safer reset point than message_end: some providers
   // may deliver late text_end updates after message_end, which would otherwise
   // re-trigger block replies.
-  ctx.resetAssistantMessageState(ctx.state.assistantTexts.length);
-  // Use assistant message_start as the earliest "writing" signal for typing.
+  // FIX: tolerate providers emitting message_start without message_stop
+  if (ctx.state.deltaBuffer || ctx.state.lastStreamedAssistant !== undefined) {
+    const lastMsg = ctx.state.lastAssistantMessage ?? msg;
+
+    handleMessageEnd(ctx, {
+      ...evt,
+      message: lastMsg,
+    });
+  }
+
+  ctx.resetAssistantMessageState(ctx.state.assistantTexts.length); // Use assistant message_start as the earliest "writing" signal for typing.
   void ctx.params.onAssistantMessageStart?.();
 }
 
@@ -344,6 +353,9 @@ export function handleMessageEnd(
   ctx: EmbeddedPiSubscribeContext,
   evt: AgentEvent & { message: AgentMessage },
 ) {
+  if (!ctx.state.deltaBuffer && ctx.state.lastStreamedAssistant === undefined) {
+    return;
+  }
   const msg = evt.message;
   if (msg?.role !== "assistant" || isTranscriptOnlyOpenClawAssistantMessage(msg)) {
     return;
@@ -392,7 +404,11 @@ export function handleMessageEnd(
     }
   }
 
-  if (!ctx.params.silentExpected && !ctx.state.emittedAssistantUpdate && (cleanedText || hasMedia)) {
+  if (
+    !ctx.params.silentExpected &&
+    !ctx.state.emittedAssistantUpdate &&
+    (cleanedText || hasMedia)
+  ) {
     const data = buildAssistantStreamData({
       text: cleanedText,
       delta: cleanedText,
