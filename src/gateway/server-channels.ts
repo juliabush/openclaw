@@ -7,7 +7,7 @@ import { formatErrorMessage } from "../infra/errors.js";
 import { resetDirectoryCache } from "../infra/outbound/target-resolver.js";
 import type { createSubsystemLogger } from "../logging/subsystem.js";
 import type { PluginRegistry } from "../plugins/registry.js";
-import { setActivePluginRegistry } from "../plugins/runtime.js";
+import { setActivePluginRegistry, getActivePluginRegistry } from "../plugins/runtime.js";
 import type { PluginRuntime } from "../plugins/runtime/types.js";
 import { resolveAccountEntry, resolveNormalizedAccountEntry } from "../routing/account-lookup.js";
 import {
@@ -32,9 +32,17 @@ export const syncPluginRegistry = () => {
     }
   ).__openclaw_plugin_runtime_state;
 
-  if (runtimeState?.registry) {
-    setActivePluginRegistry(runtimeState.registry);
+  if (!runtimeState?.registry) {
+    return;
   }
+
+  const current = getActivePluginRegistry();
+
+  if (current === runtimeState.registry) {
+    return;
+  }
+
+  setActivePluginRegistry(runtimeState.registry);
 };
 
 export type ChannelRuntimeSnapshot = {
